@@ -4,9 +4,9 @@ namespace Rmsramos\Activitylog\Actions\Concerns;
 
 use Carbon\Exceptions\InvalidFormatException;
 use Closure;
-use Filament\Actions\StaticAction;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -124,7 +124,7 @@ trait ActionContent
     }
     protected function configureInfolist(): void
     {
-        $this->infolist(function (?Model $record, Infolist $infolist) {
+        $this->infolist(function (?Model $record, Schema $infolist) {
             $activities = $this->getActivityLogRecord($record, $this->getWithRelations());
 
             $formattedActivities = $activities->map(function ($activity) {
@@ -138,7 +138,7 @@ trait ActionContent
 
             return $infolist
                 ->state(['activities' => $formattedActivities])
-                ->schema($this->getSchema());
+                ->schema($this->getFormSchema());
         });
     }
 
@@ -151,7 +151,7 @@ trait ActionContent
             ->icon('heroicon-o-bell-alert');
     }
 
-    protected function getSchema(): array
+    protected function getFormSchema(): array
     {
         return [
             TimeLineRepeatableEntry::make('activities')
@@ -178,28 +178,28 @@ trait ActionContent
         ];
     }
 
-    public function withRelations(?array $relations = null): ?StaticAction
+    public function withRelations(?array $relations = null): ?Action
     {
         $this->withRelations = $relations;
 
         return $this;
     }
 
-    public function timelineIcons(?array $timelineIcons = null): ?StaticAction
+    public function timelineIcons(?array $timelineIcons = null): ?Action
     {
         $this->timelineIcons = $timelineIcons;
 
         return $this;
     }
 
-    public function timelineIconColors(?array $timelineIconColors = null): ?StaticAction
+    public function timelineIconColors(?array $timelineIconColors = null): ?Action
     {
         $this->timelineIconColors = $timelineIconColors;
 
         return $this;
     }
 
-    public function limit(?int $limit = 10): ?StaticAction
+    public function limit(?int $limit = 10): ?Action
     {
         $this->limit = $limit;
 
@@ -337,7 +337,7 @@ trait ActionContent
     }
 
 
-    protected static function formatDateValues(array|string|null $value): array|string|null
+    protected static function formatDateValues(mixed $value): mixed
     {
         if (is_null($value)) {
             return $value;
